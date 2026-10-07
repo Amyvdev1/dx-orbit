@@ -22,6 +22,13 @@ class ComparePayload(BaseModel):
     after: dict[str, Any]
 
 
+def checked_analysis(spec: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return analyze_openapi(spec)
+    except (AttributeError, TypeError, KeyError, ValueError, RecursionError) as exc:
+        raise HTTPException(422, "Invalid OpenAPI structure. Check object, array, and schema field types.") from exc
+
+
 @app.get("/", include_in_schema=False)
 def home() -> FileResponse:
     return FileResponse(BASE / "static" / "index.html")
@@ -34,12 +41,12 @@ def health() -> dict[str, str]:
 
 @app.post("/api/analyze")
 def analyze(spec: dict[str, Any]) -> dict[str, Any]:
-    return analyze_openapi(spec)
+    return checked_analysis(spec)
 
 
 @app.post("/api/analyze-file")
 async def analyze_file(file: UploadFile = File(...)) -> dict[str, Any]:
-    raw = await file.read()
+    raw = await file.read(2_000_001)
     if len(raw) > 2_000_000:
         raise HTTPException(status_code=413, detail="OpenAPI document exceeds 2 MB demo limit")
     try:
@@ -51,14 +58,16 @@ async def analyze_file(file: UploadFile = File(...)) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=f"Invalid OpenAPI document: {exc}") from exc
     if not isinstance(spec, dict):
         raise HTTPException(status_code=400, detail="OpenAPI root must be an object")
-    return analyze_openapi(spec)
+    return checked_analysis(spec)
 
 
 @app.post("/api/compare")
 def compare(payload: ComparePayload) -> dict[str, Any]:
+    checked_analysis(payload.before)
+    checked_analysis(payload.after)
     return compare_reports(payload.before, payload.after)
 
 
 @app.post("/api/report/markdown", response_class=PlainTextResponse)
 def report_markdown(spec: dict[str, Any]) -> str:
-    return markdown_report(analyze_openapi(spec))
+    return markdown_report(checked_analysis(spec))
