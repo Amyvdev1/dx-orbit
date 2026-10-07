@@ -59,6 +59,6 @@ DX Orbit does **not** claim to prove production quality, security certification,
 ## Interview story
 > “I wanted to turn API quality from a vague opinion into an inspectable developer-experience review. DX Orbit parses the contract, measures six dimensions, explains every penalty, generates starter examples, and supports before/after comparison so an API team can prove that the developer experience improved.”
 
-## CI setup status
-The automated GitHub Actions workflow is pending upload authorization. The tests are included and can be run locally with python -m pytest. No passing GitHub CI run is claimed.
+## Continuous integration
+The Verify workflow runs the test suite and Python compilation on Python 3.12 for pushes to main and pull requests. It has read-only repository permissions. Run the tests locally with `python -m pytest`.
 
