@@ -1,0 +1,13 @@
+[project]
+name = "dx-orbit"
+version = "1.0.0"
+requires-python = ">=3.11"
+description = "Developer Experience Observatory for OpenAPI contracts."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"

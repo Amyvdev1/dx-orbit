@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: Orders API
+  version: 1.0.0
+  description: Create and inspect demo orders through a documented developer-facing contract.
+servers:
+  - url: https://api.example.com
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []
+tags:
+  - name: Orders
+paths:
+  /orders/{order_id}:
+    get:
+      operationId: get_order
+      summary: Get an order
+      description: Returns one order by stable identifier and documents recoverable failure behavior.
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          description: Stable order identifier returned by the create operation.
+          schema:
+            type: string
+            example: ord_demo_1
+      responses:
+        "200":
+          description: Order returned.
+          content:
+            application/json:
+              example: {id: ord_demo_1, status: created}
+        "404":
+          description: Order was not found.
+          content:
+            application/json:
+              example: {code: not_found, message: Order not found, next_action: Verify the order identifier}
+        "429":
+          description: Client exceeded the documented rate limit.
